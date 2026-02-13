@@ -13,6 +13,7 @@ You need to have the following programs/libraries (and their dependencies) in or
  - `wiiu-pkg-config`
  - `ninja`
  - `meson`
+ 
 Configure using `meson`: 
 ```bash
 # you can change "build" to any directory name of your choosing
