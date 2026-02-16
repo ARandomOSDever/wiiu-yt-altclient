@@ -1,6 +1,3 @@
-build/
-# sometimes the meson vscode extension also generates this:
-builddir/
-
-subprojects/*
-!subprojects/*.wrap
+extlibs/subprojects/*
+!extlibs/subprojects/*.wrap
+!extlibs/subprojects/packagefiles

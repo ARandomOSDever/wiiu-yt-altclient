@@ -1,36 +1,30 @@
 #include <coreinit/memory.h>
-#include <SDL2/SDL_ttf.h>
-#include <SDL2/SDL_rwops.h>
-#include <string>
-#include <map>
-#include "exceptions.h"
-
-class Font {
-private:
-    std::map<int, TTF_Font *> fonts; // Used to be able to have multiple font sizes
-    SDL_Renderer *renderer;
-    SDL_RWops *ttfData;
-public:
-    Font(SDL_Renderer *renderer);
-    ~Font();
-    FontError reinitFontsWithFile(std::string fontPath);
-};
-
-Font::Font(SDL_Renderer *r) {
+#include "font.h"
+#include <whb/log_cafe.h>
+#include <whb/log.h>
+FontSys::FontSys(SDL_Renderer *r) {
     if (TTF_Init() == -1) {
-        printf("TTF_Init: %s", SDL_GetError());
         TTF_Quit();
-        throw FONT_INIT_SDLTTF_FAILED;
+        throw FONTSYS_INIT_SDLTTF_FAILED;
     }
     reinitFontsWithFile("sys");
     renderer = r;
 }
 
-Font::~Font() {
-
+FontSys::~FontSys() {
+    for (auto const& [size, fontptr] : fonts){
+            TTF_CloseFont(fontptr);
+            fonts.erase(size);
+        }
 }
 
-FontError Font::reinitFontsWithFile(std::string fontPath = "sys") {
+void FontSys::ensureFontIsLoaded(int size) {
+    if (!fonts[size]) {
+        fonts[size] = TTF_OpenFontRW(ttfData, 0, size);
+    }
+}
+
+FontError FontSys::reinitFontsWithFile(std::string fontPath = "sys") {
     if (fontPath != "sys"){
         ttfData = SDL_RWFromFile(fontPath.c_str(), "rb");
     }
@@ -38,16 +32,40 @@ FontError Font::reinitFontsWithFile(std::string fontPath = "sys") {
         void *ttfPtr;
         uint32_t ttfSize;
         OSGetSharedData(OS_SHAREDDATATYPE_FONT_STANDARD, 0, &ttfPtr, &ttfSize);
-        ttfData = SDL_RWFromConstMem(&ttfPtr, (int)ttfSize);
+        ttfData = SDL_RWFromMem(&ttfPtr, (int)ttfSize);
     }
-    if (fonts.size() == 0){
-        fonts[24] = TTF_OpenFontRW(ttfData, 0, 24);
+    fonts[24] = TTF_OpenFontRW(ttfData, 0, 24);
+    WHBLogPrintf("ttf data: 0x%.8x", ttfData);
+    for (auto const& [size, fontptr] : fonts){
+        TTF_CloseFont(fontptr);
+        fonts[size] = TTF_OpenFontRW(ttfData, 0, size);
     }
-    else {
-        for (auto const& [size, fontptr] : fonts){
-            TTF_CloseFont(fontptr);
-            fonts[size] = TTF_OpenFontRW(ttfData, 0, size);
-        }
+    WHBLogPrintf("fonts 24: 0x%.8x", fonts[24]);
+    return FONTSYS_OK;
+}
+
+SDL_Rect FontSys::textBounds(const char* text, int size) {
+    SDL_Rect out;
+    ensureFontIsLoaded(size);
+    TTF_SizeUTF8(fonts[size], text, &out.w, &out.h);
+    return out;
+}
+
+FontError FontSys::drawText(int x, int y, const char* text, int size, SDL_Color fgColor, int wrapLength=0) {
+    ensureFontIsLoaded(size);
+    SDL_Surface *surf;
+    if (strlen(text) == 0) return FONTSYS_OK; // RenderUTF8 returns error when strlen == 0
+    surf = TTF_RenderUTF8_Blended_Wrapped(fonts[size], text, fgColor, wrapLength);
+    if (surf == nullptr) {
+        WHBLogPrintf("draw ttf error: %s; fonts[size]: 0x%.8x", TTF_GetError(), fonts[size]);
+        return FONTSYS_RENDERTEXT_FAILED;
     }
-    return FONT_OK;
+    SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surf);
+    if (texture == nullptr) return FONTSYS_SURF2TEXT_FAILED;
+    SDL_Rect textRect = textBounds(text, size);
+    textRect.x = x;
+    textRect.y = y;
+    int res = SDL_RenderCopy(renderer, texture, nullptr, &textRect);
+    if (res < 0) return FONTSYS_RENDERCOPY_FAILED;
+    return FONTSYS_OK;
 }

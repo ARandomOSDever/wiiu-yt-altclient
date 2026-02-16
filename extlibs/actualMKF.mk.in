@@ -1,0 +1,18 @@
+### BEGIN GIT TEMPLATE
+{}: init 
+
+### END GIT TEMPLATE
+
+
+# Dirs:
+MKFDIR := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
+PREFIX := $(MKFDIR)/build-$(ARCH)
+DLDIR  := $(MKFDIR)/downloads
+DLARCH := $(ARCH)
+BDIR   := build-$(ARCH)
+BINDIR := $(PREFIX)/bin
+LIBDIR := $(PREFIX)/lib
+INCDIR := $(PREFIX)/include
+PKGDIR := $(PREFIX)/lib/pkgconfig
+
+GIT := git clone -q -c advice.detachedHead=false --single-branch --no-tags --depth 1

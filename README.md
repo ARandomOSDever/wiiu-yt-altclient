@@ -4,6 +4,7 @@ This is a work in progress alternative Youtube client for the Nintendo Wii U
  - In order to properly use the official client you need to find a specific version of the client which was removed from the update servers (title ID 0005000010105700) and you need a WUPS [plugin](https://github.com/PretendoNetwork/GiveMiiYouTube) to use it
  - The official client uses the TV interface, which personally is the worst YT UI
     - To be frank, I barely used the TV interface other than fiddling around in the Wii U client
+    - Since it's an official client, it also **ad**ds some stuff to videos _(if you know what I mean)_
 ## Building
 You need to have the following programs/libraries (and their dependencies) in order to build this:
  - `devkitPPC`
@@ -13,8 +14,15 @@ You need to have the following programs/libraries (and their dependencies) in or
  - `wiiu-pkg-config`
  - `ninja`
  - `meson`
- 
-Configure using `meson`: 
+
+Firstly build non-Meson dependencies:
+```bash
+cd extlibs
+make -j$(nproc)
+# if no errors:
+cd .. # go back to source root
+```
+configure using `meson`: 
 ```bash
 # you can change "build" to any directory name of your choosing
 meson setup build --cross-file crossfile.ini
@@ -29,4 +37,4 @@ ninja
 # or you can do this
 meson compile
 ```
-A RPX file called "yt-altclient.rpx" will be compiled
+A RPX file called "yt-altclient.rpx" will be compiled, which you can run with Cemu or Wiiload it to your Wii U

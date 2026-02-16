@@ -1,11 +1,15 @@
-#include <nlohmann/json.hpp>
-
-using json = nlohmann::json;
-
-json defaultConfig{
-    {"theme", "dark"},
-    {"lang", "en"},
-    {"apdOverride", 0},
-    {"brightnessOverride", -1}
+class Config {
+private:
+    /* data */
+public:
+    Config(/* args */);
+    ~Config();
 };
+
+Config::Config(/* args */) {
+}
+
+Config::~Config() {
+}
+
 

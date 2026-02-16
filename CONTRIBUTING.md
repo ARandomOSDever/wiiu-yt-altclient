@@ -1,0 +1,1 @@
+ - Don't directly use LLMs. By this I mean that if you search for something online and the search engine has some sort of AI assistant but you didn't use its generated code (unless there's no other way to implement it) then it's fine

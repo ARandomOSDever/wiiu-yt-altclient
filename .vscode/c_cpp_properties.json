@@ -6,12 +6,13 @@
                 "${workspaceFolder}/**",
                 "/opt/devkitpro/wut/include/**",
                 "/opt/devkitpro/portlibs/wiiu/include/**",
-                "/opt/devkitpro/devkitPPC/powerpc-eabi/include/**"
+                "/opt/devkitpro/devkitPPC/powerpc-eabi/include/**",
+                "${workspaceFolder}/include/**"
             ],
             "defines": [],
             "compilerPath": "/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc",
             "cStandard": "c17",
-            "cppStandard": "c++17",
+            "cppStandard": "c++20",
             "intelliSenseMode": "linux-clang-x64",
             "configurationProvider": "mesonbuild.mesonbuild"
         }

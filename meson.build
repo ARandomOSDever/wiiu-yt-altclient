@@ -1,15 +1,21 @@
-project('yt-altclient', ['c', 'cpp'])
+project('yt-altclient', ['c', 'cpp'], default_options : ['cpp_std=c++20','default_library=static'])
 
 if host_machine.system() == 'cafeos'
 
 devkitpro = '/opt/devkitpro'
 elf2rpl = devkitpro / 'tools/bin/elf2rpl'
 pname = meson.project_name()
+cc = meson.get_compiler('c')
 
 sources = []
 dependencies = []
 dependencies += dependency('sdl2')
 dependencies += dependency('SDL2_ttf')
+dependencies += dependency('libpng')
+dependencies += dependency('zlib')
+dependencies += cc.find_library('bz2')
+dependencies += dependency('libbrotlidec')
+#dependencies += dependency('libbrotlicommon')
 dependencies += dependency('nlohmann_json')
 
 subdir('src')
