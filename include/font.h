@@ -4,12 +4,12 @@
 #include <SDL2/SDL_rwops.h>
 #include "ytACl_exceptions.h"
 #include <SDL2/SDL_ttf.h>
+#include <coreinit/memory.h>
 #include <string>
 class FontSys {
 private:
     std::map<int, TTF_Font *> fonts; // Used to be able to have multiple font sizes
     SDL_Renderer *renderer;
-    SDL_Surface *rootSurface;
     SDL_RWops *ttfData;
 public:
     FontSys(SDL_Renderer *renderer);

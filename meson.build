@@ -13,9 +13,8 @@ dependencies += dependency('sdl2')
 dependencies += dependency('SDL2_ttf')
 dependencies += dependency('libpng')
 dependencies += dependency('zlib')
-dependencies += cc.find_library('bz2')
+dependencies += cc.find_library('bz2') # i'm having issues with the bz2 wrap
 dependencies += dependency('libbrotlidec')
-#dependencies += dependency('libbrotlicommon')
 dependencies += dependency('nlohmann_json')
 
 subdir('src')

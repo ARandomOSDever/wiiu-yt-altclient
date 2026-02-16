@@ -1,7 +1,5 @@
-#include <coreinit/memory.h>
 #include "font.h"
-#include <whb/log_cafe.h>
-#include <whb/log.h>
+
 FontSys::FontSys(SDL_Renderer *r) {
     if (TTF_Init() == -1) {
         TTF_Quit();
@@ -16,6 +14,7 @@ FontSys::~FontSys() {
             TTF_CloseFont(fontptr);
             fonts.erase(size);
         }
+    SDL_RWclose(ttfData);
 }
 
 void FontSys::ensureFontIsLoaded(int size) {
@@ -25,22 +24,21 @@ void FontSys::ensureFontIsLoaded(int size) {
 }
 
 FontError FontSys::reinitFontsWithFile(std::string fontPath = "sys") {
-    if (fontPath != "sys"){
-        ttfData = SDL_RWFromFile(fontPath.c_str(), "rb");
+    if (fontPath == "sys"){
+        void *ttfPtr = nullptr;
+        uint32_t ttfSize = 0;
+        OSGetSharedData(OS_SHAREDDATATYPE_FONT_STANDARD, 0, &ttfPtr, &ttfSize); 
+        ttfData = SDL_RWFromConstMem(ttfPtr, (int)ttfSize);
     }
     else {
-        void *ttfPtr;
-        uint32_t ttfSize;
-        OSGetSharedData(OS_SHAREDDATATYPE_FONT_STANDARD, 0, &ttfPtr, &ttfSize);
-        ttfData = SDL_RWFromMem(&ttfPtr, (int)ttfSize);
+       ttfData = SDL_RWFromFile(fontPath.c_str(), "rb"); 
     }
     fonts[24] = TTF_OpenFontRW(ttfData, 0, 24);
-    WHBLogPrintf("ttf data: 0x%.8x", ttfData);
+    
     for (auto const& [size, fontptr] : fonts){
         TTF_CloseFont(fontptr);
         fonts[size] = TTF_OpenFontRW(ttfData, 0, size);
     }
-    WHBLogPrintf("fonts 24: 0x%.8x", fonts[24]);
     return FONTSYS_OK;
 }
 
@@ -57,7 +55,6 @@ FontError FontSys::drawText(int x, int y, const char* text, int size, SDL_Color 
     if (strlen(text) == 0) return FONTSYS_OK; // RenderUTF8 returns error when strlen == 0
     surf = TTF_RenderUTF8_Blended_Wrapped(fonts[size], text, fgColor, wrapLength);
     if (surf == nullptr) {
-        WHBLogPrintf("draw ttf error: %s; fonts[size]: 0x%.8x", TTF_GetError(), fonts[size]);
         return FONTSYS_RENDERTEXT_FAILED;
     }
     SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surf);
